@@ -1,0 +1,53 @@
+[gd_scene load_steps=4 format=3 uid="uid://cirqp6ed3jvgx"]
+
+[ext_resource type="PackedScene" uid="uid://dmchqxwptq4k8" path="res://scenes/ui_element_scenes/ui_window_mode_button.tscn" id="1_b30uj"]
+[ext_resource type="Script" path="res://scenes/ui_element_scenes/ui_graphics.gd" id="1_lgkma"]
+[ext_resource type="PackedScene" uid="uid://bwutiiqbjdjr7" path="res://scenes/ui_element_scenes/ui_resolution_mode_button.tscn" id="2_umsuh"]
+
+[node name="UiGraphics" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lgkma")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -448.0
+offset_top = -260.0
+offset_right = 448.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 72
+
+[node name="UiWindowModeButton" parent="Panel/MarginContainer/VBoxContainer" instance=ExtResource("1_b30uj")]
+layout_mode = 2
+
+[node name="UiResolutionModeButton" parent="Panel/MarginContainer/VBoxContainer" instance=ExtResource("2_umsuh")]
+layout_mode = 2

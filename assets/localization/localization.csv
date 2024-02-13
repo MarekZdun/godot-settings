@@ -1,0 +1,33 @@
+id,en,de,lv,es,ru,fr,pt_BR,it,sv_SE,tr,pl
+Right,Right,Rechts,Pa Labi,Derecha,Вправо,À droite,Direita,Destra,Höger,Sağ,Prawo
+Left,Left,Links,Pa kreisi,Izquierda,Влево,À gauche,Esquerda,Sinistra,Vänster,Sol,Lewo
+Up,Up,Oben,Uz augšu,Arriba,Вверх,En haut,Acima,Su,Upp,Yukarı,Góra
+Down,Down,Unten,Uz leju,Abajo,Вниз,En bas,Abaixo,Giù,Ner,Aşağı,Dół
+Jump,Jump,Springen,Lekt,Saltar,Прыжок,Sauter,Saltar,Saltare,Hoppa,Zıpla,Wyskok
+Shoot,Shoot,Schießen,Šaut,Disparar,Огонь,Tirer,Atirar,Sparare,Skjut,Ateş,Strzelać
+NEW_GAME,New game,Neues Spiel,Jauna spēle,Nuevo juego,Новая игра,Nouveau jeu,Novo jogo,Nuova partita,Nytt spel,Yeni oyun,Nowa gra
+CONTINUE,Continue,Fortsetzen,Turpināt spēli,Continuar,Продолжить,Continuer,Continuar,Continua,Återuppta,Devam et,Kontynuować
+RESUME,Resume,Fortsetzen,Atsākt,Reanudar,Продолжить,Reprendre,Resumir,Riprendi,Fortsätt,Devam et,Wznawiać
+RESTART,Restart,Neustart,Restartēt,Reiniciar,Заново,Redémarrer,Reiniciar,Ricomincia,Starta om,Yeniden başla,Ponawiać
+OPTIONS,Options,Optionen,Iespējas,Opciones,Опции,Options,Opções,Opzioni,Inställningar,Ayarlar,Opcje
+MAIN_MENU,Main Menu,Hauptmenü,Galvenā izvēlne,Menú principal,Главное меню,Menu principal,Menu principal,Menu principale,Huvudmeny,Anamenü,Menu główne
+BACK,Back,Zurück,Atpakaļ,Atrás,Назад,Retour,Voltar,Indietro,Bakåt,Geri,Wstecz
+EXIT,Exit,Beenden,Iziet no spēles,Salir,Выход,Sortie,Sair,Esci,Avsluta,Çıkış,Wyjście
+PAUSE,Pause,Pause,Pauze,Pausa,Пауза,Pause,Pausa,Pausa,Pausa,Durdur,Pauza
+LOADING,Loading,Wird geladen,Lādējās,Cargando,Загрузка,Chargement,Carregando,Caricamento,Laddar,Yükleniyor,Wczytywanie
+RESOLUTION,Resolution,Auflösung,Izšķirtspēja,Resolución,Pазрешение,Résolution,Resolução,Risoluzione,Upplösning,Çözünürlük,Rozdzielczość
+FULLSCREEN,Fullscreen window,Vollbild-Fenster,Pilnekrāns,Pantalla completa,Полноэкранный,Plein écran,Tela cheia,Schermo interno,Helskärm,Tam ekran,Pełny ekran
+BORDERLESS,Borderless window,Randloses Fenster,Bezmalu ekrāns,Pantalla sin bordes,Безрамочный,Sans bordure,Sem bordas,Senza bordi,Ramlöst fönster,Kenarlıksız pencere,Bez ramki
+SCALE,Scale,Skalierung,Palielinājums,Escalado,Маштабирование,Échelle,Escala,Scala,Skala,Boyut,Skala
+VOLUME,Volume,Lautstärke,Skaļums,Volumen,Громкость,Volume,Volume,Volume,Volym,Ses,Dźwięk
+MASTER,Master,Gesamt,Galvenais,General,Мастер,Principal,Principal,Principale,Alla,Oyun,Główny
+MUSIC,Music,Musik,Mūzika,Música,Музыка,Musique,Música,Musica,Musik,Müzik,Muzyka
+SFX,Sounds,Geräusche,Skaņu efekti,Efectos de Sonido,Звуки,Effet sonore,Efeitos,Suoni,Effekter,Ses Efektleri,Efekty
+CONTROLS,Controls,Steuerung,Kontroles,Controles,Управления,Controles,Controles,Controlli,Kontroller,Kontroller,Element sterujący
+ACTIONS,Actions,Aktionen,Darbība,Acciones,Действия,Actions,Ações,Azioni,Actions,Hareketler,Akcje
+KEYBOARD,Keyboard,Tastatur,Klaviatūra,Teclado,Клавиатура,Clavier,Teclado,Tastiera,Tangentbord,Klavye,Klawiatura
+GAMEPAD,Gamepad,Gamepad,Spēļu pūlts,Gamepad,Геймпад,Gamepad,Controle,Gamepad,Gamepad,Gamepad,Kontroler
+DEFAULT,Default,Standard,Noklusējums,Defecto,По умолчанию,Défaut,Padrão,Predefinito,Standard,Standart,Domyślny
+USE_NEW_CONTROLS,Use new control!,Verwenden Sie eine neue Taste!,Izmantojiet jauno kontroli!,Usar nuevos controles!,Используйте новый элемент управления!,Utilisez un nouveau contrôle!,Use novo controle!,Usa nuovi controlli!,Använd nya kontroller,Yeni kontrol kullan!,Użyj nowych elementów sterujących
+CANCEL,Cancel,Abbrechen,Atcelt,Cancelar,Отмена,Annuler,Cancelar,Annulla,Avbryt,İptal,Anuluj
+LANGUAGES,Languages,Sprachen,Valodas,Idiomas,Языки,Langues,Idiomas,Lingue,Språk,Diller,Języki

@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://q4u5q16sfq2c"]
+
+[ext_resource type="Texture2D" uid="uid://c7e2w7p1gmf2j" path="res://icon.svg" id="1_40v2h"]
+
+[node name="TestScene2" type="Node"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+texture_filter = 3
+position = Vector2(124.22, 126.44)
+scale = Vector2(1.96531, 1.93063)
+texture = ExtResource("1_40v2h")

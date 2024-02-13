@@ -1,0 +1,16 @@
+# LANGUAGE translation for Settings for the following files:
+# res://scenes/ui_element_scenes/ui_input_rebind.tscn
+#
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Settings\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+#: scenes/ui_element_scenes/ui_input_rebind.tscn
+msgid "DEFAULT"
+msgstr ""

@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://rhb453iwblm8"]
+
+[ext_resource type="Script" path="res://work/main.gd" id="1_n0ief"]
+[ext_resource type="PackedScene" uid="uid://cirqp6ed3jvgx" path="res://scenes/ui_element_scenes/ui_graphics.tscn" id="2_ovewn"]
+[ext_resource type="PackedScene" uid="uid://bqw6n87uye5jk" path="res://scenes/ui_element_scenes/ui_info.tscn" id="3_av4t6"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_n0ief")
+debug = false
+
+[node name="UiGraphics" parent="." instance=ExtResource("2_ovewn")]
+
+[node name="UiInfo" parent="." instance=ExtResource("3_av4t6")]

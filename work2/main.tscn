@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://bjrqotsb473og"]
+
+[ext_resource type="Script" path="res://work2/main.gd" id="1_n2jni"]
+[ext_resource type="PackedScene" uid="uid://c738lnploq2jl" path="res://scenes/ui_element_scenes/ui_input_rebind.tscn" id="2_dc6gd"]
+[ext_resource type="PackedScene" uid="uid://bqw6n87uye5jk" path="res://scenes/ui_element_scenes/ui_info.tscn" id="3_phpq0"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_n2jni")
+debug = false
+
+[node name="UiInputRebind" parent="." instance=ExtResource("2_dc6gd")]
+input_button_file_path = "res://scenes/ui_element_scenes/ui_input_button_3.tscn"
+
+[node name="UiInfo" parent="." instance=ExtResource("3_phpq0")]
