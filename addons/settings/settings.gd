@@ -275,7 +275,7 @@ class SettingControls extends Object:
 
 	func get_controls_data() -> SettingControlsResource:
 		var setting_controls_resource := SettingControlsResource.new()
-		var input_map: Dictionary = InputHelper.serialize_inputs_for_actions(Settings.input_actions)
+		var input_map: Dictionary = serialize_inputs_for_actions(Settings.input_actions)
 		for action_name in input_map:
 			var input_event: Dictionary = input_map[action_name]
 			var input_event_resource := InputEventResource.new()
@@ -299,7 +299,110 @@ class SettingControls extends Object:
 			input_event["mouse"] = input_event_resource.mouse
 			input_event["joypad"] = input_event_resource.joypad
 			input_map[action_name] = input_event
-		InputHelper.deserialize_inputs_for_actions(input_map)
+		deserialize_inputs_for_actions(input_map)
+		
+		
+	func serialize_inputs_for_actions(actions: PackedStringArray = []) -> Dictionary:
+		if actions == null or actions.is_empty():
+			actions = InputMap.get_actions()
+
+		var map: Dictionary = {}
+		for action in actions:
+			var inputs: Array[InputEvent] = InputMap.action_get_events(action)
+			var action_map: Dictionary = {
+				"keyboard": [],
+				"mouse": [],
+				"joypad": []
+			}
+			for input in inputs:
+				if input is InputEventKey:
+					var s: String = get_label_for_input(input)
+					var modifiers: Array[String] = []
+					if input.alt_pressed:
+						modifiers.append("alt")
+					if input.shift_pressed:
+						modifiers.append("shift")
+					if input.ctrl_pressed:
+						modifiers.append("ctrl")
+					if input.meta_pressed:
+						modifiers.append("meta")
+					if not modifiers.is_empty():
+						s += "|" + ",".join(modifiers)
+					action_map["keyboard"].append(s)
+				elif input is InputEventMouseButton:
+					action_map["mouse"].append(input.button_index)
+				elif input is InputEventJoypadButton:
+					action_map["joypad"].append(input.button_index)
+				elif input is InputEventJoypadMotion:
+					action_map["joypad"].append("%d|%d" % [input.axis, input.axis_value])
+
+			map[action] = action_map
+
+		return map
+		
+		
+	func deserialize_inputs_for_actions(map: Dictionary) -> void:
+		for action in map.keys():
+			InputMap.action_erase_events(action)
+
+			for key in map[action]["keyboard"]:
+				var keyboard_input = InputEventKey.new()
+				if "|" in key:
+					var bits = key.split("|")
+					keyboard_input.keycode = OS.find_keycode_from_string(bits[0])
+					bits = bits[1].split(",")
+					if bits.has("alt"):
+						keyboard_input.alt_pressed = true
+					if bits.has("shift"):
+						keyboard_input.shift_pressed = true
+					if bits.has("ctrl"):
+						keyboard_input.ctrl_pressed = true
+					if bits.has("meta"):
+						keyboard_input.meta_pressed = true
+				else:
+					keyboard_input.keycode = OS.find_keycode_from_string(key)
+				InputMap.action_add_event(action, keyboard_input)
+
+			for button_index in map[action]["mouse"]:
+				var mouse_input = InputEventMouseButton.new()
+				mouse_input.button_index = int(button_index)
+				InputMap.action_add_event(action, mouse_input)
+
+			for button_index_or_motion in map[action]["joypad"]:
+				if "|" in str(button_index_or_motion):
+					var joypad_motion_input = InputEventJoypadMotion.new()
+					var bits = button_index_or_motion.split("|")
+					joypad_motion_input.axis = int(bits[0])
+					joypad_motion_input.axis_value = float(bits[1])
+					InputMap.action_add_event(action, joypad_motion_input)
+				else:
+					var joypad_input = InputEventJoypadButton.new()
+					joypad_input.button_index = int(button_index_or_motion)
+					InputMap.action_add_event(action, joypad_input)
+					
+					
+	func get_label_for_input(input: InputEvent) -> String:
+		if input == null: return ""
+
+		if input is InputEventKey:
+			if input.physical_keycode > 0:
+				var keycode := DisplayServer.keyboard_get_keycode_from_physical(input.physical_keycode)
+				return OS.get_keycode_string(keycode)
+			elif input.keycode > 0:
+				return OS.get_keycode_string(input.keycode)
+			else:
+				return input.as_text()
+		elif input is InputEventMouseButton:
+			match input.button_index:
+				MOUSE_BUTTON_LEFT:
+					return "Mouse Left Button"
+				MOUSE_BUTTON_MIDDLE:
+					return "Mouse Middle Button"
+				MOUSE_BUTTON_RIGHT:
+					return "Mouse Right Button"
+			return "Mouse Button %d" % input
+
+		return input.as_text()
 
 # ------------------------------------------------------------------------------
 
