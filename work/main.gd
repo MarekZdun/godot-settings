@@ -6,10 +6,13 @@ var _last_size : Vector2i
 
 
 func _ready():
+	Settings.setting_language.retranslated.connect(_on_retranslated)
+	
 	#DisplayServer.window_set_min_size(Settings.resolution_mode_sizes[0])
 	_last_size = DisplayServer.window_get_size()
 	
-	await get_tree().create_timer(2).timeout
+	await get_tree().create_timer(4).timeout
+	Settings.reset_to_default()
 	
 	
 func _process(delta):
@@ -27,3 +30,7 @@ func _input(event):
 
 func _on_viewport_size_changed():
 	Settings.setting_display.evaluate_display()
+	
+	
+func _on_retranslated(language: String) -> void:
+	print(language)

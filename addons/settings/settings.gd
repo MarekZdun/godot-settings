@@ -73,11 +73,7 @@ func _ready():
 	if not load_settings():
 		setting_audio.reset_to_default()
 		setting_controls.reset_to_default()
-		
-		if OS.get_locale_language() in TranslationServer.get_loaded_locales():
-			setting_language.set_language(OS.get_locale_language())
-		else:
-			setting_language.set_language(LANGUAGE_DEFAULT)
+		setting_language.reset_to_default()
 		
 		setting_display.evaluate_display()
 		
@@ -171,8 +167,8 @@ func load_settings_JSON() -> bool:
 func reset_to_default() -> void:
 	setting_audio.reset_to_default()
 	setting_controls.reset_to_default()
-	setting_display.reset_to_default()
 	setting_language.reset_to_default()
+	setting_display.reset_to_default()
 	
 	
 func _update_save_config_file_path() -> void:
@@ -486,16 +482,18 @@ class SettingControls extends Object:
 
 class SettingLanguage extends Object:
 	
-	signal retranslated
+	signal retranslated(language)
 	
 	var language: String:
 		set = set_language
 		
 		
 	func set_language(p_language: String) -> void:
+		var previous_language := language
 		language = p_language
 		TranslationServer.set_locale(language)
-		retranslated.emit()
+		if previous_language != language:
+			retranslated.emit(language)
 		
 		
 	func add_translations(p_translations: Array[Translation]) -> void:
@@ -514,7 +512,10 @@ class SettingLanguage extends Object:
 		
 		
 	func reset_to_default() -> void:
-		pass
+		if OS.get_locale_language() in TranslationServer.get_loaded_locales():
+			set_language(OS.get_locale_language())
+		else:
+			set_language(Settings.LANGUAGE_DEFAULT)
 
 # ------------------------------------------------------------------------------
 
