@@ -10,13 +10,22 @@ var _last_size : Vector2i
 func _ready():
 	h_slider.value_changed.connect(_on_h_slider_value_changed)
 	Settings.setting_audio.volume_master_changed.connect(_on_volume_master_changed)
+	Settings.setting_audio.volume_music_changed.connect(_on_volume_music_changed)
+	Settings.setting_audio.volume_sound_changed.connect(_on_volume_sound_changed)
+	Settings.setting_audio.volume_sound_2d_changed.connect(_on_volume_sound_2d_changed)
+	Settings.setting_audio.volume_sound_3d_changed.connect(_on_volume_sound_3d_changed)
+	
 	_on_volume_master_changed(0, Settings.setting_audio.volume_master)
+	_on_volume_music_changed(0, Settings.setting_audio.volume_music)
+	_on_volume_sound_changed(0, Settings.setting_audio.volume_sound)
+	_on_volume_sound_2d_changed(0, Settings.setting_audio.volume_sound_2d)
+	_on_volume_sound_3d_changed(0, Settings.setting_audio.volume_sound_3d)
 	
 	#DisplayServer.window_set_min_size(Settings.resolution_mode_sizes[0])
 	_last_size = DisplayServer.window_get_size()
 	
 	await get_tree().create_timer(4).timeout
-	Settings.setting_audio.reset_to_default()
+	#Settings.reset_to_default()
 	
 	
 func _process(delta):
@@ -44,4 +53,25 @@ func _on_h_slider_value_changed(value: float) -> void:
 	
 func _on_volume_master_changed(previous_volume: float, volume: float) -> void:
 	h_slider.value = volume * 100
-	#print("%s - %s" % [previous_volume, volume]) 
+	print("master: %s - %s" % [previous_volume, volume])
+	pass 
+	
+	
+func _on_volume_music_changed(previous_volume: float, volume: float) -> void:
+	print("music: %s - %s" % [previous_volume, volume])
+	pass
+	
+	
+func _on_volume_sound_changed(previous_volume: float, volume: float) -> void:
+	print("sound: %s - %s" % [previous_volume, volume])
+	pass
+	
+	
+func _on_volume_sound_2d_changed(previous_volume: float, volume: float) -> void:
+	print("sound_2d: %s - %s" % [previous_volume, volume])
+	pass
+	
+	
+func _on_volume_sound_3d_changed(previous_volume: float, volume: float) -> void:
+	print("sound_3d: %s - %s" % [previous_volume, volume])
+	pass

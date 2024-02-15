@@ -72,6 +72,7 @@ func _ready():
 	
 	if not load_settings():
 		setting_audio.reset_to_default()
+		setting_controls.reset_to_default()
 		
 		if OS.get_locale_language() in TranslationServer.get_loaded_locales():
 			setting_language.set_language(OS.get_locale_language())
@@ -165,6 +166,13 @@ func load_settings_JSON() -> bool:
 		return false
 	_update_settings(settings)
 	return true
+	
+	
+func reset_to_default() -> void:
+	setting_audio.reset_to_default()
+	setting_controls.reset_to_default()
+	setting_display.reset_to_default()
+	setting_language.reset_to_default()
 	
 	
 func _update_save_config_file_path() -> void:
@@ -297,6 +305,10 @@ class SettingAudio extends Object:
 
 class SettingControls extends Object:
 
+	signal keyboard_input_changed(action, input)
+	signal joypad_input_changed(action, input)
+
+
 	func get_controls_data() -> SettingControlsResource:
 		var setting_controls_resource := SettingControlsResource.new()
 		var input_map: Dictionary = serialize_inputs_for_actions(Settings.input_actions)
@@ -404,6 +416,14 @@ class SettingControls extends Object:
 					joypad_input.button_index = int(button_index_or_motion)
 					InputMap.action_add_event(action, joypad_input)
 					
+			var input: InputEvent = get_joypad_input_for_action(action)
+			if input != null:
+				joypad_input_changed.emit(action, input)
+
+			input = get_keyboard_input_for_action(action)
+			if input != null:
+				keyboard_input_changed.emit(action, input)
+					
 					
 	func get_label_for_input(input: InputEvent) -> String:
 		if input == null: return ""
@@ -429,8 +449,38 @@ class SettingControls extends Object:
 		return input.as_text()
 		
 		
+	func get_joypad_inputs_for_action(action: String) -> Array[InputEvent]:
+		return InputMap.action_get_events(action).filter(func(event):
+			return event is InputEventJoypadButton or event is InputEventJoypadMotion
+		)
+		
+		
+	func get_joypad_input_for_action(action: String) -> InputEvent:
+		var buttons: Array[InputEvent] = get_joypad_inputs_for_action(action)
+		return null if buttons.is_empty() else buttons[0]
+		
+		
+	func get_keyboard_inputs_for_action(action: String) -> Array[InputEvent]:
+		return InputMap.action_get_events(action).filter(func(event):
+			return event is InputEventKey or event is InputEventMouseButton
+		)
+		
+		
+	func get_keyboard_input_for_action(action: String) -> InputEvent:
+		var inputs: Array[InputEvent] = get_keyboard_inputs_for_action(action)
+		return null if inputs.is_empty() else inputs[0]
+		
+		
 	func reset_to_default() -> void:
-		InputMap.load_from_project_settings()	# ????
+		InputMap.load_from_project_settings()
+		for action in Settings.input_actions:
+			var input: InputEvent = get_joypad_input_for_action(action)
+			if input != null:
+				joypad_input_changed.emit(action, input)
+
+			input = get_keyboard_input_for_action(action)
+			if input != null:
+				keyboard_input_changed.emit(action, input)
 
 # ------------------------------------------------------------------------------
 
@@ -461,6 +511,10 @@ class SettingLanguage extends Object:
 		
 	func set_language_data(setting_language_resource: SettingLanguageResource) -> void:
 		language = setting_language_resource.locale
+		
+		
+	func reset_to_default() -> void:
+		pass
 
 # ------------------------------------------------------------------------------
 
@@ -627,5 +681,9 @@ class SettingDisplay extends Object:
 		else :
 			change_to_window()
 		change_resolution_mode_to(setting_display_resource.resolution_mode_index)
+		
+		
+	func reset_to_default() -> void:
+		pass
 
 # ------------------------------------------------------------------------------
