@@ -71,11 +71,7 @@ func _ready():
 	setting_language.add_translations(_gettext_translations)
 	
 	if not load_settings():
-		setting_audio.set_volume_master(volume_master_default)
-		setting_audio.set_volume_music(volume_music_default)
-		setting_audio.set_volume_sound(volume_sound_default)
-		setting_audio.set_volume_sound_2d(volume_sound_2d_default)
-		setting_audio.set_volume_sound_3d(volume_sound_3d_default)
+		setting_audio.reset_to_default()
 		
 		if OS.get_locale_language() in TranslationServer.get_loaded_locales():
 			setting_language.set_language(OS.get_locale_language())
@@ -207,6 +203,12 @@ func _update_settings(p_settings: SettingsResource) -> void:
 	
 class SettingAudio extends Object:
 	
+	signal volume_master_changed(previous_volume, volume)
+	signal volume_music_changed(previous_volume, volume)
+	signal volume_sound_changed(previous_volume, volume)
+	signal volume_sound_2d_changed(previous_volume, volume)
+	signal volume_sound_3d_changed(previous_volume, volume)
+	
 	var volume_master: float = 0.0:
 		set = set_volume_master
 	var volume_music: float = 0.0:
@@ -220,36 +222,50 @@ class SettingAudio extends Object:
 
 
 	func set_volume_master(volume: float) -> void:
+		var previous_volume_master := volume_master
 		volume_master = volume
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), linear_to_db(volume_master))
-		
+		if previous_volume_master != volume_master:
+			volume_master_changed.emit(previous_volume_master, volume_master)
 		
 	func set_volume_music(volume: float) -> void:
+		var previous_volume_music := volume_music
 		volume_music = volume
 		var bus_index := AudioServer.get_bus_index("Music")
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(volume_music))
+			if previous_volume_music != volume_music:
+				volume_music_changed.emit(previous_volume_music, volume_music)
 		
 		
 	func set_volume_sound(volume: float) -> void:
+		var previous_volume_sound := volume_sound
 		volume_sound = volume
 		var bus_index := AudioServer.get_bus_index("Sound")
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(bus_index, linear_to_db(volume_sound))
+			if previous_volume_sound != volume_sound:
+				volume_sound_changed.emit(previous_volume_sound, volume_sound)
 		
 		
 	func set_volume_sound_2d(volume: float) -> void:
+		var previous_volume_sound_2d := volume_sound_2d
 		volume_sound_2d = volume
 		var bus_index := AudioServer.get_bus_index("Sound2D")
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Sound2D"), linear_to_db(volume_sound_2d))
+			if previous_volume_sound_2d != volume_sound_2d:
+				volume_sound_2d_changed.emit(previous_volume_sound_2d, volume_sound_2d)
 		
 		
 	func set_volume_sound_3d(volume: float) -> void:
+		var previous_volume_sound_3d := volume_sound_3d
 		volume_sound_3d = volume
 		var bus_index := AudioServer.get_bus_index("Sound3D")
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Sound3D"), linear_to_db(volume_sound_3d))
+			if previous_volume_sound_3d != volume_sound_3d:
+				volume_sound_3d_changed.emit(previous_volume_sound_3d, volume_sound_3d)
 
 
 	func get_audio_data() -> SettingAudioResource:
@@ -268,6 +284,14 @@ class SettingAudio extends Object:
 		set_volume_sound(setting_audio_resource.volume_sound)
 		set_volume_sound_2d(setting_audio_resource.volume_sound_2d)
 		set_volume_sound_3d(setting_audio_resource.volume_sound_3d)
+		
+		
+	func reset_to_default() -> void:
+		volume_master = Settings.volume_master_default
+		volume_music = Settings.volume_music_default
+		volume_sound = Settings.volume_sound_default
+		volume_sound_2d = Settings.volume_sound_2d_default
+		volume_sound_3d = Settings.volume_sound_3d_default
 	
 # ------------------------------------------------------------------------------
 
@@ -403,6 +427,10 @@ class SettingControls extends Object:
 			return "Mouse Button %d" % input
 
 		return input.as_text()
+		
+		
+	func reset_to_default() -> void:
+		InputMap.load_from_project_settings()	# ????
 
 # ------------------------------------------------------------------------------
 
