@@ -71,11 +71,7 @@ func _ready():
 	setting_language.add_translations(_gettext_translations)
 	
 	if not load_settings():
-		setting_audio.reset_to_default()
-		setting_controls.reset_to_default()
-		setting_language.reset_to_default()
-		
-		setting_display.evaluate_display()
+		reset_to_default()
 		
 		
 func _get_property_list() -> Array:
@@ -207,11 +203,11 @@ func _update_settings(p_settings: SettingsResource) -> void:
 	
 class SettingAudio extends Object:
 	
-	signal volume_master_changed(previous_volume, volume)
-	signal volume_music_changed(previous_volume, volume)
-	signal volume_sound_changed(previous_volume, volume)
-	signal volume_sound_2d_changed(previous_volume, volume)
-	signal volume_sound_3d_changed(previous_volume, volume)
+	signal volume_master_changed(volume, previous_volume)
+	signal volume_music_changed(volume, previous_volume)
+	signal volume_sound_changed(volume, previous_volume)
+	signal volume_sound_2d_changed(volume, previous_volume)
+	signal volume_sound_3d_changed(volume, previous_volume)
 	
 	var volume_master: float = 0.0:
 		set = set_volume_master
@@ -230,7 +226,7 @@ class SettingAudio extends Object:
 		volume_master = volume
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), linear_to_db(volume_master))
 		if previous_volume_master != volume_master:
-			volume_master_changed.emit(previous_volume_master, volume_master)
+			volume_master_changed.emit(volume_master, previous_volume_master)
 		
 	func set_volume_music(volume: float) -> void:
 		var previous_volume_music := volume_music
@@ -239,7 +235,7 @@ class SettingAudio extends Object:
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(volume_music))
 			if previous_volume_music != volume_music:
-				volume_music_changed.emit(previous_volume_music, volume_music)
+				volume_music_changed.emit(volume_music, previous_volume_music)
 		
 		
 	func set_volume_sound(volume: float) -> void:
@@ -249,7 +245,7 @@ class SettingAudio extends Object:
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(bus_index, linear_to_db(volume_sound))
 			if previous_volume_sound != volume_sound:
-				volume_sound_changed.emit(previous_volume_sound, volume_sound)
+				volume_sound_changed.emit(volume_sound, previous_volume_sound)
 		
 		
 	func set_volume_sound_2d(volume: float) -> void:
@@ -259,7 +255,7 @@ class SettingAudio extends Object:
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Sound2D"), linear_to_db(volume_sound_2d))
 			if previous_volume_sound_2d != volume_sound_2d:
-				volume_sound_2d_changed.emit(previous_volume_sound_2d, volume_sound_2d)
+				volume_sound_2d_changed.emit(volume_sound_2d, previous_volume_sound_2d)
 		
 		
 	func set_volume_sound_3d(volume: float) -> void:
@@ -269,7 +265,7 @@ class SettingAudio extends Object:
 		if bus_index != -1:
 			AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Sound3D"), linear_to_db(volume_sound_3d))
 			if previous_volume_sound_3d != volume_sound_3d:
-				volume_sound_3d_changed.emit(previous_volume_sound_3d, volume_sound_3d)
+				volume_sound_3d_changed.emit(volume_sound_3d, previous_volume_sound_3d)
 
 
 	func get_audio_data() -> SettingAudioResource:
@@ -521,8 +517,10 @@ class SettingLanguage extends Object:
 
 class SettingDisplay extends Object:
 	
-	signal resized
+	signal resized(current_resolution, previous_resolution)
 	signal fullscreen_changed(fullscreen)
+	signal content_scale_size_changed(current_scale_size, previous_scale_size)
+	signal content_scale_factor_changed(current_content_scale_factor, previous_content_scale_factor)
 	
 	var fullscreen: bool = false
 	var borderless: bool = false
@@ -532,10 +530,10 @@ class SettingDisplay extends Object:
 	var viewport_size: Vector2i
 	var window_size: Vector2i
 	var screen_size: Vector2i
-	var base_size: Vector2i
-	var base_size_scaled: Vector2i
-	var screen_aspect_ratio: float
-			
+	var base_size: Vector2i = Vector2(ProjectSettings["display/window/size/viewport_width"], ProjectSettings["display/window/size/viewport_height"])
+	var content_scale_size: Vector2i
+	var content_scale_factor: float
+	
 	
 	func change_to_fullscreen() -> void:
 		var previous_resolution := window_size
@@ -548,7 +546,7 @@ class SettingDisplay extends Object:
 		if fullscreen != previous_fullscreen:
 			fullscreen_changed.emit(fullscreen)
 		if window_size != previous_resolution:
-			resized.emit()
+			resized.emit(window_size, previous_resolution)
 			
 			
 	func change_to_window() -> void:
@@ -567,7 +565,7 @@ class SettingDisplay extends Object:
 		if fullscreen != previous_fullscreen:
 			fullscreen_changed.emit(fullscreen)
 		if window_size != previous_resolution:
-			resized.emit()
+			resized.emit(window_size, previous_resolution)
 			
 			
 	func change_to_borderless_window() -> void:
@@ -584,7 +582,7 @@ class SettingDisplay extends Object:
 		if fullscreen != previous_fullscreen:
 			fullscreen_changed.emit(fullscreen)
 		if window_size != previous_resolution:
-			resized.emit()
+			resized.emit(window_size, previous_resolution)
 		
 		
 	func change_resolution_mode_to(index: int) -> void:
@@ -596,7 +594,7 @@ class SettingDisplay extends Object:
 
 		evaluate_display()
 		if window_size != previous_resolution:
-			resized.emit()
+			resized.emit(window_size, previous_resolution)
 		
 		
 	func get_resolution_mode_size() -> Vector2i:
@@ -607,7 +605,7 @@ class SettingDisplay extends Object:
 		
 		
 	func change_scale(p_scale: int) -> void:
-		if Settings.get_tree().root.content_scale_mode == Window.CONTENT_SCALE_MODE_DISABLED:
+		if Settings.get_window().content_scale_mode == Window.CONTENT_SCALE_MODE_DISABLED:
 			return
 		var previous_resolution := window_size
 		var previous_fullscreen := fullscreen
@@ -624,16 +622,33 @@ class SettingDisplay extends Object:
 		if fullscreen != previous_fullscreen:
 			fullscreen_changed.emit(fullscreen)
 		if window_size != previous_resolution:
-			resized.emit()
+			resized.emit(window_size, previous_resolution)
+			
+			
+	func change_content_scale_size(p_content_scale_size: Vector2i) -> void:
+		var previous_content_scale_size := content_scale_size
+		Settings.get_window().content_scale_size = p_content_scale_size
+		
+		evaluate_display()
+		if content_scale_size != previous_content_scale_size:
+			content_scale_size_changed.emit(content_scale_size, previous_content_scale_size)
+		
+		
+	func change_content_scale_factor(p_content_scale_factor: float) -> void:
+		var previous_content_scale_factor := content_scale_factor
+		Settings.get_window().content_scale_factor = p_content_scale_factor
+		
+		evaluate_display()
+		if content_scale_factor != previous_content_scale_factor:
+			content_scale_factor_changed.emit(content_scale_factor, previous_content_scale_factor)
 			
 			
 	func evaluate_display() -> void:
 		viewport_size = Settings.get_viewport().get_visible_rect().size
 		window_size = DisplayServer.window_get_size()
 		screen_size = DisplayServer.screen_get_size()
-		base_size =  Vector2(ProjectSettings["display/window/size/viewport_width"], ProjectSettings["display/window/size/viewport_height"])
-		base_size_scaled = Settings.get_tree().root.content_scale_size
-		screen_aspect_ratio = float(screen_size.x) / float(screen_size.y)
+		content_scale_size = Settings.get_window().content_scale_size
+		content_scale_factor = Settings.get_window().content_scale_factor
 		fullscreen = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 		borderless = DisplayServer.window_get_flag(DisplayServer.WINDOW_FLAG_BORDERLESS)
 		resolution_mode_index = find_index_most_similar_vector2i_to_base_vector2i(window_size, Settings.resolution_mode_sizes) \
@@ -671,20 +686,39 @@ class SettingDisplay extends Object:
 		setting_display_resource.fullscreen = fullscreen
 		setting_display_resource.borderless = borderless
 		setting_display_resource.resolution_mode_index = resolution_mode_index
+		setting_display_resource.content_scale_size = content_scale_size
+		setting_display_resource.content_scale_factor = content_scale_factor
 		return setting_display_resource
 		
 		
 	func set_display_data(setting_display_resource: SettingDisplayResource) -> void:
+		change_resolution_mode_to(setting_display_resource.resolution_mode_index)
 		if setting_display_resource.fullscreen:
 			change_to_fullscreen()
 		elif setting_display_resource.borderless:
 			change_to_borderless_window()
 		else :
 			change_to_window()
-		change_resolution_mode_to(setting_display_resource.resolution_mode_index)
+			
+		change_content_scale_size(setting_display_resource.content_scale_size)
+		change_content_scale_factor(setting_display_resource.content_scale_factor)
 		
 		
 	func reset_to_default() -> void:
-		pass
+		var size_mode: DisplayServer.WindowMode = ProjectSettings["display/window/size/mode"]
+		var size_borderless: bool = ProjectSettings["display/window/size/borderless"]
+		var stretch_scale: float = ProjectSettings["display/window/stretch/scale"]
+
+		DisplayServer.window_set_size(base_size)
+		evaluate_display()
+		if size_mode == DisplayServer.WINDOW_MODE_FULLSCREEN:
+			change_to_fullscreen()
+		elif size_borderless == true:
+			change_to_borderless_window()
+		elif size_mode == DisplayServer.WINDOW_MODE_WINDOWED:
+			change_to_window()
+		
+		change_content_scale_size(base_size)
+		change_content_scale_factor(stretch_scale)
 
 # ------------------------------------------------------------------------------

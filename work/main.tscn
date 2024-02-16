@@ -6,7 +6,6 @@
 
 [node name="Main" type="Node"]
 script = ExtResource("1_n0ief")
-debug = false
 
 [node name="UiGraphics" parent="." instance=ExtResource("2_ovewn")]
 

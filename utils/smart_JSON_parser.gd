@@ -17,6 +17,9 @@ static func serialize_variant_data(variant) -> Dictionary:
 	elif variant_type == TYPE_VECTOR2:
 		output_data = serialize_vector2_data(variant)
 		
+	elif variant_type == TYPE_VECTOR2I:
+		output_data = serialize_vector2i_data(variant)
+		
 	elif variant_type == TYPE_VECTOR3:
 		output_data = serialize_vector3_data(variant)
 		
@@ -48,6 +51,9 @@ static func serialize_object_data(obj: Object) -> Dictionary:
 			elif prop.type == TYPE_VECTOR2:
 				output_data.value[prop_name] = serialize_vector2_data(prop_value)
 				
+			elif prop.type == TYPE_VECTOR2I:
+				output_data.value[prop_name] = serialize_vector2i_data(prop_value)
+				
 			elif prop.type == TYPE_VECTOR3:
 				output_data.value[prop_name] = serialize_vector3_data(prop_value)
 				
@@ -75,6 +81,9 @@ static func serialize_dictionary_data(dic: Dictionary) -> Dictionary:
 			
 		elif typeof(value) == TYPE_VECTOR2:
 			output_data.value[key] = serialize_vector2_data(value)
+			
+		elif typeof(value) == TYPE_VECTOR2I:
+			output_data.value[key] = serialize_vector2i_data(value)
 			
 		elif typeof(value) == TYPE_VECTOR3:
 			output_data.value[key] = serialize_vector3_data(value)
@@ -104,6 +113,9 @@ static func serialize_array_data(arr: Array) -> Dictionary:
 		elif typeof(value) == TYPE_VECTOR2:
 			output_data.value.append(serialize_vector2_data(value))
 			
+		elif typeof(value) == TYPE_VECTOR2I:
+			output_data.value.append(serialize_vector2i_data(value))
+			
 		elif typeof(value) == TYPE_VECTOR3:
 			output_data.value.append(serialize_vector3_data(value))
 			
@@ -119,6 +131,18 @@ static func serialize_vector2_data(vec2: Vector2) -> Dictionary:
 		"value": {
 			"x": vec2.x,
 			"y": vec2.y
+		}
+	}
+	
+	return output_data
+	
+	
+static func serialize_vector2i_data(vec2i: Vector2i) -> Dictionary:
+	var output_data: Dictionary = {
+		"type": typeof(vec2i),
+		"value": {
+			"x": vec2i.x,
+			"y": vec2i.y
 		}
 	}
 	
@@ -163,6 +187,9 @@ static func deserialize_variant_data(text_data: Dictionary):
 	elif type == TYPE_VECTOR2:
 		output_data = deserialize_vector2_data(text_data)
 		
+	elif type == TYPE_VECTOR2I:
+		output_data = deserialize_vector2i_data(text_data)
+		
 	elif type == TYPE_VECTOR3:
 		output_data = deserialize_vector3_data(text_data)
 		
@@ -195,6 +222,9 @@ static func deserialize_object_data(text_data: Dictionary) -> Object:
 		elif prop_type == TYPE_VECTOR2:
 			output_data.set(prop_name, deserialize_vector2_data(value[prop_name]))
 			
+		elif prop_type == TYPE_VECTOR2I:
+			output_data.set(prop_name, deserialize_vector2i_data(value[prop_name]))
+			
 		elif prop_type == TYPE_VECTOR3:
 			output_data.set(prop_name, deserialize_vector3_data(value[prop_name]))
 			
@@ -223,6 +253,9 @@ static func deserialize_dictionary_data(text_data: Dictionary) -> Dictionary:
 			
 		elif prop_type == TYPE_VECTOR2:
 			output_data[prop_name] = deserialize_vector2_data(value[prop_name])
+			
+		elif prop_type == TYPE_VECTOR2I:
+			output_data[prop_name] = deserialize_vector2i_data(value[prop_name])
 			
 		elif prop_type == TYPE_VECTOR3:
 			output_data[prop_name] = deserialize_vector3_data(value[prop_name])
@@ -255,6 +288,9 @@ static func deserialize_array_data(text_data: Dictionary) -> Array:
 		elif prop_type == TYPE_VECTOR2:
 			output_data.append(deserialize_vector2_data(value[i]))
 			
+		elif prop_type == TYPE_VECTOR2I:
+			output_data.append(deserialize_vector2i_data(value[i]))
+			
 		elif prop_type == TYPE_VECTOR3:
 			output_data.append(deserialize_vector3_data(value[i]))
 			
@@ -268,6 +304,12 @@ static func deserialize_vector2_data(text_data: Dictionary) -> Vector2:
 #	var type: int = text_data.type
 	var value: Dictionary = text_data.value
 	return Vector2(value.x, value.y)
+	
+	
+static func deserialize_vector2i_data(text_data: Dictionary) -> Vector2i:
+#	var type: int = text_data.type
+	var value: Dictionary = text_data.value
+	return Vector2i(value.x, value.y)
 	
 	
 static func deserialize_vector3_data(text_data: Dictionary) -> Vector3:
