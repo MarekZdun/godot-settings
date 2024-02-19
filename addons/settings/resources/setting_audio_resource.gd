@@ -1,5 +1,5 @@
 class_name SettingAudioResource
-extends SmartResource
+extends Resource
 
 @export_range(0, 1, .05) var volume_master: float = 1.0
 @export_range(0, 1, .05) var volume_music: float = 1.0

@@ -1,19 +1,20 @@
 @tool
 extends Node
 
-enum SaveLoadType {JSON_, RESOURCE_}
+enum SaveLoadType {JSON_, RESOURCE_, INI_}
 enum WindowModeType {FULLSCREEN, WINDOW, BORDERLESS_WINDOW}
 enum GettextFileExtensions {PO, MO}
 
 const LANGUAGE_DEFAULT: String = "en"
 
 @export var gettext_file_extension: GettextFileExtensions = GettextFileExtensions.PO
-@export_group("Save Config Path")
+@export_group("Save Config")
+@export var save_config_type: SaveLoadType = SaveLoadType.JSON_
 @export_dir var save_config_dir_path: String = "user://save":
 	set(p_save_config_dir_path):
 		save_config_dir_path = p_save_config_dir_path
 		_update_save_config_file_path()
-@export var save_config_filename: String = "settings.tres":
+@export var save_config_filename: String = "settings":
 	set(p_save_config_filename):
 		save_config_filename = p_save_config_filename
 		_update_save_config_file_path()
@@ -107,28 +108,30 @@ func _get_property_list() -> Array:
 	return properties
 	
 	
-func save_settings(save_load_type: SaveLoadType = SaveLoadType.JSON_) -> void:
+func save_settings(save_load_type: SaveLoadType = save_config_type) -> void:
 	DirAccess.make_dir_recursive_absolute(save_config_dir_path)
-	
-	var settings := SettingsResource.new()
-	settings.setting_audio = setting_audio.get_audio_data()
-	settings.setting_controls = setting_controls.get_controls_data()
-	settings.setting_language = setting_language.get_language_data()
-	settings.setting_display = setting_display.get_display_data()
-	
+
+	var settings: SettingsResource
 	match save_load_type:
 		SaveLoadType.JSON_:
+			settings = _evaluate_settings(SettingsSmartJSONResource.new())
 			save_settings_JSON(settings)
 		SaveLoadType.RESOURCE_:
+			settings = _evaluate_settings(SettingsResource.new())
 			save_settings_resource(settings)
+		SaveLoadType.INI_:
+			settings = _evaluate_settings(SettingsResource.new())
+			save_settings_INI(settings)
 	
 	
-func load_settings(save_load_type: SaveLoadType = SaveLoadType.JSON_) -> bool:
+func load_settings(save_load_type: SaveLoadType = save_config_type) -> bool:
 	match save_load_type:
 		SaveLoadType.JSON_:
 			return load_settings_JSON()
 		SaveLoadType.RESOURCE_:
 			return load_settings_resource()
+		SaveLoadType.INI_:
+			return load_settings_INI()
 		_:
 			return false
 	
@@ -140,22 +143,77 @@ func save_settings_resource(settings: SettingsResource) -> void:
 func load_settings_resource() -> bool:
 	var settings := FileUtil.load_data_resource(_save_config_file_path) as SettingsResource
 	if not settings:
+		print("Error loading the settings.")
 		return false
 	_update_settings(settings)
 	return true
 	
 	
-func save_settings_JSON(settings: SettingsResource) -> void:
+func save_settings_JSON(settings: SettingsSmartJSONResource) -> void:
 	FileUtil.save_data_JSON(_save_config_file_path, SmartJSONParser.serialize_variant_data(settings), "\t")
 	
 	
 func load_settings_JSON() -> bool:
-	var settings: SettingsResource
+	var settings: SettingsSmartJSONResource
 	var data : Dictionary = FileUtil.load_data_JSON(_save_config_file_path)
 	if !data.is_empty() and data.has("type") and data.has("value"):
 		settings = SmartJSONParser.deserialize_variant_data(data)
 	if not settings:
+		print("Error loading the settings.")
 		return false
+	_update_settings(settings)
+	return true
+	
+	
+func save_settings_INI(settings: SettingsResource) -> void:
+	var config := ConfigFile.new()
+	for section in settings.get_property_list():
+		if section.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
+			var setting: Resource = settings[section.name]
+			for prop in setting.get_property_list():
+				if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
+					config.set_value(section.name, prop.name, setting[prop.name])
+	config.save(_save_config_file_path)
+	
+	
+func load_settings_INI() -> bool:
+	var config := ConfigFile.new()
+	var settings: SettingsResource = SettingsResource.new()
+	var error := config.load(_save_config_file_path)
+	if error != OK:
+		print("Error loading the settings. Error code: %s" % error)
+		return false
+		
+	for section in settings.get_property_list():
+		if section.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
+			if section.name == "setting_audio":
+				var setting_audio_res := SettingAudioResource.new()
+				for prop in setting_audio_res.get_property_list():
+					if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
+						setting_audio_res[prop.name] = config.get_value(section.name, prop.name)
+				settings[section.name] = setting_audio_res
+						
+			elif section.name == "setting_controls":
+				var setting_controls_res := SettingControlsResource.new()
+				for prop in setting_controls_res.get_property_list():
+					if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
+						setting_controls_res[prop.name] = config.get_value(section.name, prop.name)
+				settings[section.name] = setting_controls_res
+						
+			elif section.name == "setting_language":
+				var setting_language_res := SettingLanguageResource.new()
+				for prop in setting_language_res.get_property_list():
+					if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
+						setting_language_res[prop.name] = config.get_value(section.name, prop.name)
+				settings[section.name] = setting_language_res
+						
+			elif section.name == "setting_display":
+				var setting_display_res := SettingDisplayResource.new()
+				for prop in setting_display_res.get_property_list():
+					if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
+						setting_display_res[prop.name] = config.get_value(section.name, prop.name)
+				settings[section.name] = setting_display_res
+					
 	_update_settings(settings)
 	return true
 	
@@ -168,7 +226,15 @@ func reset_to_default() -> void:
 	
 	
 func _update_save_config_file_path() -> void:
-	_save_config_file_path = save_config_dir_path.path_join(save_config_filename)
+	var ext: String
+	match save_config_type:
+		SaveLoadType.JSON_:
+			ext = ".json"
+		SaveLoadType.RESOURCE_:
+			ext = ".tres"
+		SaveLoadType.INI_:
+			ext = ".ini"
+	_save_config_file_path = save_config_dir_path.path_join(save_config_filename + ext)
 	
 	
 func _update_translations() -> void:
@@ -198,6 +264,21 @@ func _update_settings(p_settings: SettingsResource) -> void:
 	setting_controls.set_controls_data(p_settings.setting_controls)
 	setting_language.set_language_data(p_settings.setting_language)
 	setting_display.set_display_data(p_settings.setting_display)
+	
+	
+func _evaluate_settings(p_settings: SettingsResource) -> SettingsResource:
+	if p_settings is SettingsSmartJSONResource:
+		p_settings.setting_audio = setting_audio.get_smart_JSON_audio_data()
+		p_settings.setting_controls = setting_controls.get_smart_JSON_controls_data()
+		p_settings.setting_language = setting_language.get_smart_JSON_language_data()
+		p_settings.setting_display = setting_display.get_smart_JSON_display_data()
+	else :
+		p_settings.setting_audio = setting_audio.get_audio_data()
+		p_settings.setting_controls = setting_controls.get_controls_data()
+		p_settings.setting_language = setting_language.get_language_data()
+		p_settings.setting_display = setting_display.get_display_data()
+	
+	return p_settings
 
 # ------------------------------------------------------------------------------	
 	
@@ -278,6 +359,16 @@ class SettingAudio extends Object:
 		return setting_audio_resource
 		
 		
+	func get_smart_JSON_audio_data() -> SettingAudioSmartJSONResource:
+		var setting_audio_resource := SettingAudioSmartJSONResource.new()
+		setting_audio_resource.volume_master = volume_master
+		setting_audio_resource.volume_music = volume_music
+		setting_audio_resource.volume_sound = volume_sound
+		setting_audio_resource.volume_sound_2d = volume_sound_2d
+		setting_audio_resource.volume_sound_3d = volume_sound_3d
+		return setting_audio_resource
+		
+		
 	func set_audio_data(setting_audio_resource: SettingAudioResource) -> void:
 		set_volume_master(setting_audio_resource.volume_master)
 		set_volume_music(setting_audio_resource.volume_music)
@@ -307,6 +398,20 @@ class SettingControls extends Object:
 		for action_name in input_map:
 			var input_event: Dictionary = input_map[action_name]
 			var input_event_resource := InputEventResource.new()
+			input_event_resource.keyboard = input_event["keyboard"]
+			input_event_resource.mouse = input_event["mouse"]
+			input_event_resource.joypad = input_event["joypad"]
+			setting_controls_resource.action_names.append(action_name)
+			setting_controls_resource.action_input_events.append(input_event_resource)
+		return setting_controls_resource
+		
+		
+	func get_smart_JSON_controls_data() -> SettingControlsSmartJSONResource:
+		var setting_controls_resource := SettingControlsSmartJSONResource.new()
+		var input_map: Dictionary = serialize_inputs_for_actions(Settings.input_actions)
+		for action_name in input_map:
+			var input_event: Dictionary = input_map[action_name]
+			var input_event_resource := InputEventSmartJSONResource.new()
 			input_event_resource.keyboard = input_event["keyboard"]
 			input_event_resource.mouse = input_event["mouse"]
 			input_event_resource.joypad = input_event["joypad"]
@@ -503,6 +608,12 @@ class SettingLanguage extends Object:
 		return setting_language_resource
 		
 		
+	func get_smart_JSON_language_data() -> SettingLanguageSmartJSONResource:
+		var setting_language_resource := SettingLanguageSmartJSONResource.new()
+		setting_language_resource.locale = TranslationServer.get_locale()
+		return setting_language_resource
+		
+		
 	func set_language_data(setting_language_resource: SettingLanguageResource) -> void:
 		language = setting_language_resource.locale
 		
@@ -572,6 +683,7 @@ class SettingDisplay extends Object:
 		var previous_resolution := window_size
 		var previous_fullscreen := fullscreen
 		
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
 		if not Settings.resolution_mode_sizes.is_empty():
@@ -683,6 +795,16 @@ class SettingDisplay extends Object:
 
 	func get_display_data() -> SettingDisplayResource:
 		var setting_display_resource := SettingDisplayResource.new()
+		setting_display_resource.fullscreen = fullscreen
+		setting_display_resource.borderless = borderless
+		setting_display_resource.resolution_mode_index = resolution_mode_index
+		setting_display_resource.content_scale_size = content_scale_size
+		setting_display_resource.content_scale_factor = content_scale_factor
+		return setting_display_resource
+		
+		
+	func get_smart_JSON_display_data() -> SettingDisplaySmartJSONResource:
+		var setting_display_resource := SettingDisplaySmartJSONResource.new()
 		setting_display_resource.fullscreen = fullscreen
 		setting_display_resource.borderless = borderless
 		setting_display_resource.resolution_mode_index = resolution_mode_index

@@ -1,5 +1,5 @@
 class_name InputEventResource
-extends SmartResource
+extends Resource
 
 @export var keyboard: Array
 @export var mouse: Array

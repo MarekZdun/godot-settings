@@ -1,5 +1,5 @@
 class_name SettingsResource
-extends SmartResource
+extends Resource
 
 @export var setting_audio: SettingAudioResource
 @export var setting_controls: SettingControlsResource

@@ -19,6 +19,7 @@ func _ready():
 	await get_tree().create_timer(4).timeout
 	#Settings.setting_display.change_content_scale_size(Vector2i(1152, 648))
 	#Settings.setting_display.change_content_scale_factor(1)
+	#Settings.reset_to_default()
 	
 	
 func _process(delta):

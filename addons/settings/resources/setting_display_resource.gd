@@ -1,5 +1,5 @@
 class_name SettingDisplayResource
-extends SmartResource
+extends Resource
 
 @export var resolution_mode_index: int
 @export var fullscreen: bool

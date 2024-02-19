@@ -1,4 +1,4 @@
 class_name SettingLanguageResource
-extends SmartResource
+extends Resource
 
 @export var locale: String
