@@ -9,6 +9,6 @@ script = ExtResource("1_n2jni")
 debug = false
 
 [node name="UiInputRebind" parent="." instance=ExtResource("2_dc6gd")]
-input_button_file_path = "res://scenes/ui_element_scenes/ui_input_button_3.tscn"
+input_button_file_path = "res://scenes/ui_element_scenes/ui_input_buttons.tscn"
 
 [node name="UiInfo" parent="." instance=ExtResource("3_phpq0")]

@@ -15,7 +15,13 @@ func _ready():
 	reset_button.button_down.connect(_on_reset_button_button_down)
 	create_input_action_list()
 	if action_list_v_box_container.get_child_count() > 0:
-		action_list_v_box_container.get_child(0).grab_focus()
+		var input_button_first := action_list_v_box_container.get_child(0)
+		if input_button_first.focus_mode == FOCUS_NONE:
+			var buttons := input_button_first.find_children("*", "Button")
+			if not buttons.is_empty():
+				buttons[0].grab_focus()
+		else:
+			input_button_first.grab_focus()
 
 
 func create_input_action_list() -> void:
