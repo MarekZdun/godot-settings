@@ -773,7 +773,7 @@ class SettingDisplay extends Object:
 		
 	func center_window() -> void:
 		var center_screen := DisplayServer.screen_get_position() + DisplayServer.screen_get_size() / 2
-		var window_size := Settings.get_window().get_size_with_decorations()
+		var window_size := Settings.get_window().get_size()
 		Settings.get_window().set_position(center_screen - window_size / 2)
 		
 		
