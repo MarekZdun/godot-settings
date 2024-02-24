@@ -27,6 +27,6 @@ func on_fullscreen_changed(fullscreen: bool) -> void:
 		option_button.set_disabled(true)
 	else:
 		check_resolution_mode(Settings.setting_display.resolution_mode_index)
-		option_button.set_text(Settings.resolution_mode_names[Settings.setting_display.resolution_mode_index])
+		option_button.set_text(Settings.settings_configuration.resolution_mode_names[Settings.setting_display.resolution_mode_index])
 		option_button.set_disabled(false)
 		

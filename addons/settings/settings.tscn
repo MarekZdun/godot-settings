@@ -4,11 +4,4 @@
 
 [node name="Settings" type="Node"]
 script = ExtResource("1_6rsse")
-input_actions = Array[StringName]([&"ui_accept", &"ui_select"])
-input_action_names = Array[StringName]([&"UI Accept", &"UI Select"])
-window_mode_names = Array[StringName]([&"Fullscreen", &"Window", &"Borderless Window"])
-window_mode_types_sequence = Array[int]([0, 1, 2])
-resolution_mode_names = Array[StringName]([&"800 x 600", &"1152 x 648", &"1280 x 720", &"1440 x 900", &"1600 x 1200"])
-resolution_mode_sizes = Array[Vector2i]([Vector2i(800, 600), Vector2i(1152, 648), Vector2i(1280, 720), Vector2i(1440, 900), Vector2i(1600, 1200)])
-translation_file_paths = Array[String](["res://assets/localization/localization.en.translation", "res://assets/localization/localization.pl.translation"])
-gettext_translation_file_paths = Array[String]([])
+settings_configuration_file_path = "res://addons/settings/resources/data/settings_configuration_data/settings_configuration_test_1.tres"

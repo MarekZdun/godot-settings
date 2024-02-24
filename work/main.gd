@@ -8,7 +8,7 @@ var _last_size : Vector2i
 func _ready():
 	Settings.setting_language.retranslated.connect(_on_retranslated)
 	
-	#DisplayServer.window_set_min_size(Settings.resolution_mode_sizes[0])
+	#DisplayServer.window_set_min_size(Settings.settings_configuration.resolution_mode_sizes[0])
 	_last_size = DisplayServer.window_get_size()
 	
 	await get_tree().create_timer(4).timeout

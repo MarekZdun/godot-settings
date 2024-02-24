@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://b782tsnbej2yy"
+
+[deps]
+
+files=["res://addons/settings/resources/localization/localization.en.translation", "res://addons/settings/resources/localization/localization.de.translation", "res://addons/settings/resources/localization/localization.lv.translation", "res://addons/settings/resources/localization/localization.es.translation", "res://addons/settings/resources/localization/localization.ru.translation", "res://addons/settings/resources/localization/localization.fr.translation", "res://addons/settings/resources/localization/localization.pt_BR.translation", "res://addons/settings/resources/localization/localization.it.translation", "res://addons/settings/resources/localization/localization.sv_SE.translation", "res://addons/settings/resources/localization/localization.tr.translation", "res://addons/settings/resources/localization/localization.pl.translation"]
+
+source_file="res://addons/settings/resources/localization/localization.csv"
+dest_files=["res://addons/settings/resources/localization/localization.en.translation", "res://addons/settings/resources/localization/localization.de.translation", "res://addons/settings/resources/localization/localization.lv.translation", "res://addons/settings/resources/localization/localization.es.translation", "res://addons/settings/resources/localization/localization.ru.translation", "res://addons/settings/resources/localization/localization.fr.translation", "res://addons/settings/resources/localization/localization.pt_BR.translation", "res://addons/settings/resources/localization/localization.it.translation", "res://addons/settings/resources/localization/localization.sv_SE.translation", "res://addons/settings/resources/localization/localization.tr.translation", "res://addons/settings/resources/localization/localization.pl.translation"]
+
+[params]
+
+compress=true
+delimiter=0

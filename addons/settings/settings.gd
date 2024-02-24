@@ -1,147 +1,87 @@
 @tool
 extends Node
 
-enum SaveLoadType {JSON_, RESOURCE_, INI_}
-enum WindowModeType {FULLSCREEN, WINDOW, BORDERLESS_WINDOW}
-enum GettextFileExtensions {PO, MO}
+enum SaveType {JSON_, RESOURCE_, INI_}
 
 const LANGUAGE_DEFAULT: String = "en"
 
-@export var gettext_file_extension: GettextFileExtensions = GettextFileExtensions.PO
-@export_group("Save Config")
-@export var save_config_type: SaveLoadType = SaveLoadType.JSON_
-@export_dir var save_config_dir_path: String = "user://save":
-	set(p_save_config_dir_path):
-		save_config_dir_path = p_save_config_dir_path
-		_update_save_config_file_path()
-@export var save_config_filename: String = "settings":
-	set(p_save_config_filename):
-		save_config_filename = p_save_config_filename
-		_update_save_config_file_path()
+@export_file("*.tres") var settings_configuration_file_path: String:
+	set(value):
+		settings_configuration_file_path = value
+		_update_settings_configuration_from_file_path()
+		update_configuration_warnings()
+@export_group("Save Settings")
+@export var save_settings_type: SaveType = SaveType.JSON_
+@export_dir var save_settings_dir_path: String = "user://save":
+	set(p_save_settings_dir_path):
+		save_settings_dir_path = p_save_settings_dir_path
+		_update_save_settings_file_path()
+@export var save_settings_filename: String = "settings":
+	set(p_save_settings_filename):
+		save_settings_filename = p_save_settings_filename
+		_update_save_settings_file_path()
 
-@export_group("Audio Properties")
-@export_range(0, 1.0) var volume_master_default: float = 1.0
-@export_range(0, 1.0) var volume_music_default: float = 0.1
-@export_range(0, 1.0) var volume_sound_default: float = 0.1
-@export_range(0, 1.0) var volume_sound_2d_default: float = 0.1
-@export_range(0, 1.0) var volume_sound_3d_default: float = 0.1
-
-@export_group("Input Properties")
-@export var input_actions: Array[StringName] = []
-@export var input_action_names: Array[StringName] = []
-
-@export_group("Display Properties")
-@export var window_mode_names: Array[StringName] = []
-@export var window_mode_types_sequence: Array[WindowModeType] = []
-@export var resolution_mode_names: Array[StringName] = []
-@export var resolution_mode_sizes: Array[Vector2i] = []
-@export var catch_fullscreen_resolution: bool = true
-@export var window_resizable: bool = true
-
+var settings_configuration: SettingsConfigurationResource
 var setting_audio: SettingAudio
 var setting_controls: SettingControls
 var setting_language: SettingLanguage
 var setting_display: SettingDisplay
 
-var translation_file_paths: Array[String]:
-	set(p_translation_file_paths):
-		translation_file_paths = p_translation_file_paths
-		_update_translations()
-var gettext_translation_file_paths: Array[String]:
-	set(p_gettext_translation_file_paths):
-		gettext_translation_file_paths = p_gettext_translation_file_paths
-		_update_gettext_translations()
-
-var _save_config_file_path: String
-var _translations: Array[Translation]
-var _gettext_translations: Array[Translation]
+var _save_settings_file_path: String
 
 
 func _ready():
 	if Engine.is_editor_hint():
 		return
-	
-	_update_save_config_file_path()
+		
+	_update_save_settings_file_path()
 	
 	setting_audio = SettingAudio.new()
 	setting_controls = SettingControls.new()
 	setting_language = SettingLanguage.new()
 	setting_display = SettingDisplay.new()
 	
-	setting_language.add_translations(_translations)
-	setting_language.add_translations(_gettext_translations)
+	setting_language.add_translations(settings_configuration.translations)
+	setting_language.add_translations(settings_configuration.gettext_translations)
 	
 	if not load_settings():
 		reset_to_default()
-		
-		
-func _get_property_list() -> Array:
-	var ext: String
-	if gettext_file_extension == GettextFileExtensions.PO:
-		ext = "po"
-	elif gettext_file_extension == GettextFileExtensions.MO:
-		ext = "mo"
-		
-	var properties = []
-	properties.append({
-		"name": "Language Properties",
-		"type": TYPE_NIL,
-		"usage": PROPERTY_USAGE_GROUP,
-		"hint": PROPERTY_HINT_NONE,
-		"hint_string": ""
-	})
-	properties.append({
-		"name": "translation_file_paths",
-		"type": TYPE_ARRAY,
-		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE | PROPERTY_USAGE_DEFAULT,
-		"hint": PROPERTY_HINT_TYPE_STRING,
-		"hint_string": "%d/%d:*.translation" % [TYPE_STRING, PROPERTY_HINT_FILE]
-	})
-	properties.append({
-		"name": "gettext_translation_file_paths",
-		"type": TYPE_ARRAY,
-		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE | PROPERTY_USAGE_DEFAULT,
-		"hint": PROPERTY_HINT_TYPE_STRING,
-		"hint_string": "%d/%d:*.%s" % [TYPE_STRING, PROPERTY_HINT_FILE, ext]
-	})
-
-	return properties
 	
 	
-func save_settings(save_load_type: SaveLoadType = save_config_type) -> void:
-	DirAccess.make_dir_recursive_absolute(save_config_dir_path)
+func save_settings(save_type: SaveType = save_settings_type) -> void:
+	DirAccess.make_dir_recursive_absolute(save_settings_dir_path)
 
 	var settings: SettingsResource
-	match save_load_type:
-		SaveLoadType.JSON_:
+	match save_type:
+		SaveType.JSON_:
 			settings = _evaluate_settings(SettingsSmartJSONResource.new())
 			save_settings_JSON(settings)
-		SaveLoadType.RESOURCE_:
+		SaveType.RESOURCE_:
 			settings = _evaluate_settings(SettingsResource.new())
 			save_settings_resource(settings)
-		SaveLoadType.INI_:
+		SaveType.INI_:
 			settings = _evaluate_settings(SettingsResource.new())
 			save_settings_INI(settings)
 	
 	
-func load_settings(save_load_type: SaveLoadType = save_config_type) -> bool:
-	match save_load_type:
-		SaveLoadType.JSON_:
+func load_settings(save_type: SaveType = save_settings_type) -> bool:
+	match save_type:
+		SaveType.JSON_:
 			return load_settings_JSON()
-		SaveLoadType.RESOURCE_:
+		SaveType.RESOURCE_:
 			return load_settings_resource()
-		SaveLoadType.INI_:
+		SaveType.INI_:
 			return load_settings_INI()
 		_:
 			return false
 	
 	
 func save_settings_resource(settings: SettingsResource) -> void:
-	FileUtil.save_data_resource(_save_config_file_path, settings)
+	FileUtil.save_data_resource(_save_settings_file_path, settings)
 	
 	
 func load_settings_resource() -> bool:
-	var settings := FileUtil.load_data_resource(_save_config_file_path) as SettingsResource
+	var settings := FileUtil.load_data_resource(_save_settings_file_path) as SettingsResource
 	if not settings:
 		print("Error loading the settings.")
 		return false
@@ -150,12 +90,12 @@ func load_settings_resource() -> bool:
 	
 	
 func save_settings_JSON(settings: SettingsSmartJSONResource) -> void:
-	FileUtil.save_data_JSON(_save_config_file_path, SmartJSONParser.serialize_variant_data(settings), "\t")
+	FileUtil.save_data_JSON(_save_settings_file_path, SmartJSONParser.serialize_variant_data(settings), "\t")
 	
 	
 func load_settings_JSON() -> bool:
 	var settings: SettingsSmartJSONResource
-	var data : Dictionary = FileUtil.load_data_JSON(_save_config_file_path)
+	var data : Dictionary = FileUtil.load_data_JSON(_save_settings_file_path)
 	if !data.is_empty() and data.has("type") and data.has("value"):
 		settings = SmartJSONParser.deserialize_variant_data(data)
 	if not settings:
@@ -173,13 +113,13 @@ func save_settings_INI(settings: SettingsResource) -> void:
 			for prop in setting.get_property_list():
 				if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE == PROPERTY_USAGE_SCRIPT_VARIABLE:
 					config.set_value(section.name, prop.name, setting[prop.name])
-	config.save(_save_config_file_path)
+	config.save(_save_settings_file_path)
 	
 	
 func load_settings_INI() -> bool:
 	var config := ConfigFile.new()
 	var settings: SettingsResource = SettingsResource.new()
-	var error := config.load(_save_config_file_path)
+	var error := config.load(_save_settings_file_path)
 	if error != OK:
 		print("Error loading the settings. Error code: %s" % error)
 		return false
@@ -225,38 +165,38 @@ func reset_to_default() -> void:
 	setting_display.reset_to_default()
 	
 	
-func _update_save_config_file_path() -> void:
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings: PackedStringArray = []
+	if not _check_settings_configuration_existence():
+		warnings.append("Give proper file path to SettingsConfigurationResource type resource file")
+	return warnings
+	
+	
+func _update_save_settings_file_path() -> void:
 	var ext: String
-	match save_config_type:
-		SaveLoadType.JSON_:
+	match save_settings_type:
+		SaveType.JSON_:
 			ext = ".json"
-		SaveLoadType.RESOURCE_:
+		SaveType.RESOURCE_:
 			ext = ".tres"
-		SaveLoadType.INI_:
+		SaveType.INI_:
 			ext = ".ini"
-	_save_config_file_path = save_config_dir_path.path_join(save_config_filename + ext)
+	_save_settings_file_path = save_settings_dir_path.path_join(save_settings_filename + ext)
 	
 	
-func _update_translations() -> void:
-	_translations.clear()
-
-	for translation_file_path in translation_file_paths:
-		if translation_file_path.is_empty():
-			continue
-		var translation := load(translation_file_path)
-		if translation is OptimizedTranslation:
-			_translations.append(translation)
-			
-			
-func _update_gettext_translations() -> void:
-	_gettext_translations.clear()
-
-	for gettext_translation_file_path in gettext_translation_file_paths:
-		if gettext_translation_file_path.is_empty():
-			continue
-		var translation := load(gettext_translation_file_path)
-		if translation is Translation:
-			_gettext_translations.append(translation)
+func _update_settings_configuration_from_file_path() -> void:
+	if ResourceLoader.exists(settings_configuration_file_path):
+		settings_configuration = ResourceLoader.load(settings_configuration_file_path, "", 0) as SettingsConfigurationResource
+	else:
+		settings_configuration = null
+		
+		
+func _check_settings_configuration_existence() -> bool:
+	var exist: bool = not settings_configuration_file_path.is_empty()
+	if exist:
+		_update_settings_configuration_from_file_path()
+		exist = settings_configuration != null
+	return exist
 	
 	
 func _update_settings(p_settings: SettingsResource) -> void:
@@ -378,11 +318,11 @@ class SettingAudio extends Object:
 		
 		
 	func reset_to_default() -> void:
-		volume_master = Settings.volume_master_default
-		volume_music = Settings.volume_music_default
-		volume_sound = Settings.volume_sound_default
-		volume_sound_2d = Settings.volume_sound_2d_default
-		volume_sound_3d = Settings.volume_sound_3d_default
+		volume_master = Settings.settings_configuration.volume_master_default
+		volume_music = Settings.settings_configuration.volume_music_default
+		volume_sound = Settings.settings_configuration.volume_sound_default
+		volume_sound_2d = Settings.settings_configuration.volume_sound_2d_default
+		volume_sound_3d = Settings.settings_configuration.volume_sound_3d_default
 	
 # ------------------------------------------------------------------------------
 
@@ -394,7 +334,7 @@ class SettingControls extends Object:
 
 	func get_controls_data() -> SettingControlsResource:
 		var setting_controls_resource := SettingControlsResource.new()
-		var input_map: Dictionary = serialize_inputs_for_actions(Settings.input_actions)
+		var input_map: Dictionary = serialize_inputs_for_actions(Settings.settings_configuration.input_actions)
 		for action_name in input_map:
 			var input_event: Dictionary = input_map[action_name]
 			var input_event_resource := InputEventResource.new()
@@ -408,7 +348,7 @@ class SettingControls extends Object:
 		
 	func get_smart_JSON_controls_data() -> SettingControlsSmartJSONResource:
 		var setting_controls_resource := SettingControlsSmartJSONResource.new()
-		var input_map: Dictionary = serialize_inputs_for_actions(Settings.input_actions)
+		var input_map: Dictionary = serialize_inputs_for_actions(Settings.settings_configuration.input_actions)
 		for action_name in input_map:
 			var input_event: Dictionary = input_map[action_name]
 			var input_event_resource := InputEventSmartJSONResource.new()
@@ -570,7 +510,7 @@ class SettingControls extends Object:
 		
 	func reset_to_default() -> void:
 		InputMap.load_from_project_settings()
-		for action in Settings.input_actions:
+		for action in Settings.settings_configuration.input_actions:
 			var input: InputEvent = get_joypad_input_for_action(action)
 			if input != null:
 				joypad_input_changed.emit(action, input)
@@ -664,12 +604,16 @@ class SettingDisplay extends Object:
 		var previous_resolution := window_size
 		var previous_fullscreen := fullscreen
 		
-		if not Settings.window_resizable:
-			DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_RESIZE_DISABLED, true)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-		if not Settings.resolution_mode_sizes.is_empty():
-			DisplayServer.window_set_size(Settings.resolution_mode_sizes[resolution_mode_index])
+		if not Settings.settings_configuration.resolution_mode_sizes.is_empty():
+			var new_window_size := Settings.settings_configuration.resolution_mode_sizes[resolution_mode_index] as Vector2i
+			if not Settings.settings_configuration.window_resizable:
+				if is_first_vector2i_greater_or_equal_than_second_vector2i(new_window_size, screen_size):
+					DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_RESIZE_DISABLED, false)
+				else:
+					DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_RESIZE_DISABLED, true)
+			DisplayServer.window_set_size(new_window_size)
 		center_window()
 			
 		evaluate_display()
@@ -686,8 +630,9 @@ class SettingDisplay extends Object:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
-		if not Settings.resolution_mode_sizes.is_empty():
-			DisplayServer.window_set_size(Settings.resolution_mode_sizes[resolution_mode_index])
+		if not Settings.settings_configuration.resolution_mode_sizes.is_empty():
+			var new_window_size := Settings.settings_configuration.resolution_mode_sizes[resolution_mode_index] as Vector2i
+			DisplayServer.window_set_size(new_window_size)
 		center_window()
 		
 		evaluate_display()
@@ -700,8 +645,14 @@ class SettingDisplay extends Object:
 	func change_resolution_mode_to(index: int) -> void:
 		var previous_resolution := window_size
 		resolution_mode_index = index
-		if not Settings.resolution_mode_sizes.is_empty():
-			DisplayServer.window_set_size(Settings.resolution_mode_sizes[resolution_mode_index])
+		if not Settings.settings_configuration.resolution_mode_sizes.is_empty():
+			var new_window_size := Settings.settings_configuration.resolution_mode_sizes[resolution_mode_index] as Vector2i
+			if not borderless and not Settings.settings_configuration.window_resizable:
+				if is_first_vector2i_greater_or_equal_than_second_vector2i(new_window_size, screen_size):
+					DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_RESIZE_DISABLED, false)
+				else:
+					DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_RESIZE_DISABLED, true)
+			DisplayServer.window_set_size(new_window_size)
 		center_window()
 
 		evaluate_display()
@@ -711,8 +662,8 @@ class SettingDisplay extends Object:
 		
 	func get_resolution_mode_size() -> Vector2i:
 		var resolution_mode_size := Vector2i.ZERO
-		if not Settings.resolution_mode_sizes.is_empty():
-			resolution_mode_size = Settings.resolution_mode_sizes[resolution_mode_index]
+		if not Settings.settings_configuration.resolution_mode_sizes.is_empty():
+			resolution_mode_size = Settings.settings_configuration.resolution_mode_sizes[resolution_mode_index]
 		return resolution_mode_size
 		
 		
@@ -763,8 +714,8 @@ class SettingDisplay extends Object:
 		content_scale_factor = Settings.get_window().content_scale_factor
 		fullscreen = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 		borderless = DisplayServer.window_get_flag(DisplayServer.WINDOW_FLAG_BORDERLESS)
-		resolution_mode_index = find_index_most_similar_vector2i_to_base_vector2i(window_size, Settings.resolution_mode_sizes) \
-				 if (Settings.catch_fullscreen_resolution or !fullscreen) else resolution_mode_index
+		resolution_mode_index = find_index_most_similar_vector2i_to_base_vector2i(window_size, Settings.settings_configuration.resolution_mode_sizes) \
+				 if (Settings.settings_configuration.catch_fullscreen_resolution or !fullscreen) else resolution_mode_index
 		#max_scale = min(ceil(float(screen_size.x) / float(viewport_size.x)), ceil(float(screen_size.y) / float(viewport_size.y)))
 		max_scale = min(ceil(float(screen_size.x) / float(base_size.x)), ceil(float(screen_size.y) / float(base_size.y)))
 		#scale = max_scale if fullscreen else min(float(window_size.x) / float(viewport_size.x), float(window_size.y) / float(viewport_size.y))
@@ -791,6 +742,10 @@ class SettingDisplay extends Object:
 				most_similar_vector = pool[i]
 				index = i
 		return index
+		
+		
+	func is_first_vector2i_greater_or_equal_than_second_vector2i(first_vector: Vector2i, second_vector: Vector2i) -> bool:
+		return first_vector.x >= second_vector.x and first_vector.y >= second_vector.y
 		
 
 	func get_display_data() -> SettingDisplayResource:

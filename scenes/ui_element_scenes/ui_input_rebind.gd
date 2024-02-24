@@ -31,11 +31,11 @@ func create_input_action_list() -> void:
 	for input_button in action_list_v_box_container.get_children():
 		input_button.queue_free()
 	
-	for i in range(Settings.input_actions.size()):
+	for i in range(Settings.settings_configuration.input_actions.size()):
 		var input_button := _input_button_packed_scene.instantiate()
 		action_list_v_box_container.add_child(input_button)
-		input_button.set_action_name(Settings.input_actions[i])
-		input_button.set_action_name_for_display(Settings.input_action_names[i])
+		input_button.set_action_name(Settings.settings_configuration.input_actions[i])
+		input_button.set_action_name_for_display(Settings.settings_configuration.input_action_names[i])
 		
 		
 func _update_input_button_packed_scene_from_file_path(p_input_button_file_path: String) -> void:

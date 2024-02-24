@@ -21,7 +21,7 @@ func _ready():
 	_on_volume_sound_2d_changed(Settings.setting_audio.volume_sound_2d, 0)
 	_on_volume_sound_3d_changed(Settings.setting_audio.volume_sound_3d, 0)
 	
-	#DisplayServer.window_set_min_size(Settings.resolution_mode_sizes[0])
+	#DisplayServer.window_set_min_size(Settings.settings_configuration.resolution_mode_sizes[0])
 	_last_size = DisplayServer.window_get_size()
 	
 	await get_tree().create_timer(4).timeout

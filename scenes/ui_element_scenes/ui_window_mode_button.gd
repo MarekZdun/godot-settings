@@ -18,11 +18,11 @@ func check_window_mode(window_mode_index: int) -> void:
 
 
 func on_window_mode_selected(index: int) -> void:
-	if Settings.window_mode_types_sequence[index] == Settings.WindowModeType.FULLSCREEN:
+	if Settings.settings_configuration.window_mode_types_sequence[index] == SettingsConfigurationResource.WindowModeType.FULLSCREEN:
 		Settings.setting_display.change_to_fullscreen()
 
-	elif Settings.window_mode_types_sequence[index] == Settings.WindowModeType.WINDOW:
+	elif Settings.settings_configuration.window_mode_types_sequence[index] == SettingsConfigurationResource.WindowModeType.WINDOW:
 		Settings.setting_display.change_to_window()
 		
-	elif Settings.window_mode_types_sequence[index] == Settings.WindowModeType.BORDERLESS_WINDOW:
+	elif Settings.settings_configuration.window_mode_types_sequence[index] == SettingsConfigurationResource.WindowModeType.BORDERLESS_WINDOW:
 		Settings.setting_display.change_to_borderless_window()
