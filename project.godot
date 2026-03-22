@@ -8,16 +8,21 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Settings"
 config/tags=PackedStringArray("system")
-config/features=PackedStringArray("4.2", "GL Compatibility")
+run/main_scene="res://work2/main.tscn"
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-InputHelper="*res://addons/input_helper/input_helper.gd"
+InputHelper="*uid://cyi1nnie7s231"
 Settings="*res://addons/settings/settings.tscn"
 
 [display]

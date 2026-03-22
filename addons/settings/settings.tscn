@@ -5,3 +5,4 @@
 [node name="Settings" type="Node"]
 script = ExtResource("1_6rsse")
 settings_configuration_file_path = "res://addons/settings/resources/data/settings_configuration_data/settings_configuration_test_1.tres"
+save_settings_type = 2

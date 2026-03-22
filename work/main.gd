@@ -13,6 +13,7 @@ func _ready():
 	
 	await get_tree().create_timer(4).timeout
 	#Settings.reset_to_default()
+	#Settings.setting_language.set_language("pl")
 	#Settings.setting_display.change_content_scale_size(Vector2i(1152 * 2, 648 * 2))
 	#Settings.setting_display.change_content_scale_factor(0.5)
 	

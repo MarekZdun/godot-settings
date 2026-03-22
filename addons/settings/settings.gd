@@ -90,14 +90,14 @@ func load_settings_resource() -> bool:
 	
 	
 func save_settings_JSON(settings: SettingsSmartJSONResource) -> void:
-	FileUtil.save_data_JSON(_save_settings_file_path, SmartJSONParser.serialize_variant_data(settings), "\t")
+	FileUtil.save_data_JSON(_save_settings_file_path, SmartSerializer.serialize_variant_data(settings), "\t")
 	
 	
 func load_settings_JSON() -> bool:
 	var settings: SettingsSmartJSONResource
 	var data : Dictionary = FileUtil.load_data_JSON(_save_settings_file_path)
 	if !data.is_empty() and data.has("type") and data.has("value"):
-		settings = SmartJSONParser.deserialize_variant_data(data)
+		settings = SmartSerializer.deserialize_variant_data(data)
 	if not settings:
 		print("Error loading the settings.")
 		return false
